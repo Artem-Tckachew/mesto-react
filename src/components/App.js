@@ -9,13 +9,13 @@ import AddPlacePopup from './AddPlacePopup'
 import {React, useState, useEffect} from 'react'
 import { initialModalState } from '../utils/constants'
 import api from '../utils/api'
-import { СurrentUserContext } from '../contexts/CurrentUserContext'
+import { currentUser } from '../contexts/CurrentUserContext'
 
 function App() {
 
   const [modalsState, setModalsState] = useState(initialModalState);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [currentUser, setCurrentUser] = useState('');
+  const [currentUsers, setCurrentUsers] = useState('');
   const [cards, setCards] = useState([]);
   const [isUserSending, setIsUserSending] = useState(false);
   const [isAvatarSending, setIsAvatarSending] = useState(false);
@@ -27,7 +27,7 @@ function App() {
   }
 
   function handleCardLike(card) {
-    const isLiked = card.likes.some(i => i._id === currentUser._id);
+    const isLiked = card.likes.some(i => i._id === currentUsers._id);
     api.changeLike(card._id, !isLiked)
     .then((newCard) => {
         setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
@@ -71,7 +71,7 @@ function handleCardDelete(evt) {
   useEffect(() => {
     api.getUserData()
       .then(res => {
-        setCurrentUser(res);
+        setCurrentUsers(res);
       })
       .catch((error) => console.log(`Ошибка загрузки данных пользователя с сервера: ${error}`));
   }, []);
@@ -84,7 +84,7 @@ function handleUpdateUser(item){
   setIsUserSending(true);
   api.setUserData(item)
     .then(res => {
-      setCurrentUser(res);
+      setCurrentUsers(res);
       closeAllPopups()
     })
     .catch((error) => console.log(`Ошибка загрузки данных пользователя с сервера: ${error}`))
@@ -95,7 +95,7 @@ function handleUpdateAvatar(item){
   setIsAvatarSending(true)
   api.setUserAvatar(item)
   .then(res => {
-    setCurrentUser(res);
+    setCurrentUsers(res);
     closeAllPopups()
   })
   .catch((error) => console.log(`Ошибка загрузки данных пользователя с сервера: ${error}`))
@@ -103,7 +103,7 @@ function handleUpdateAvatar(item){
 }
 
   return (
-     <СurrentUserContext.Provider value={currentUser}>
+     <currentUser.Provider value={currentUsers}>
   <div className="page">
     <Header />
     <Main onEditProfile={() => setModalsState({isEditProfilePopupOpen: true})}
@@ -124,7 +124,7 @@ function handleUpdateAvatar(item){
     <ImagePopup card={selectedCard} onClose={() => setSelectedCard(null)} />
     
   </div>
-</СurrentUserContext.Provider>
+</currentUser.Provider>
   );
 }
 
