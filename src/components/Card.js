@@ -1,8 +1,8 @@
-import { currentUser } from '../contexts/CurrentUserContext'
+import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import React from 'react'
 
 const Card = ({ card, onCardLike, onCardDelete, onCardClick }) => {
-  const currentUsers = React.useContext(currentUser);
+  const currentUser = React.useContext(CurrentUserContext);
 
   function handleClick() {
     onCardClick(card);
@@ -15,13 +15,13 @@ const Card = ({ card, onCardLike, onCardDelete, onCardClick }) => {
   function handleLikeClick() {
     onCardLike(card)
   }
-  const isOwn = card.owner._id === currentUsers._id;
+  const isOwn = card.owner._id === currentUser._id;
 
   const cardDeleteButtonClassName = (
     `element__remove ${isOwn ? 'element__remove_active' : 'element__remove_innactive'}`
   );
 
-  const isLiked = card.likes.some(i => i._id === currentUsers._id);
+  const isLiked = card.likes.some(i => i._id === currentUser._id);
   
   const cardLikeButtonClassName = `element__like ${isLiked ? 'element__like_active' : ''}`;
   return(

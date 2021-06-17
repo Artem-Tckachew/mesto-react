@@ -7,19 +7,18 @@ import EditProfilePopup from './EditProfilePopup'
 import EditAvatarPopup from './EditAvatarPopup'
 import AddPlacePopup from './AddPlacePopup'
 import {React, useState, useEffect} from 'react'
-import { initialModalState } from '../utils/constants'
 import api from '../utils/api'
-import { currentUser } from '../contexts/CurrentUserContext'
+import { CurrentUserContext } from '../contexts/CurrentUserContext'
 
 function App() {
 
-  const [modalsState, setModalsState] = useState(initialModalState);
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [currentUsers, setCurrentUsers] = useState('');
+  const [currentUser, setCurrentUser] = useState('');
   const [cards, setCards] = useState([]);
-  const [isUserSending, setIsUserSending] = useState(false);
-  const [isAvatarSending, setIsAvatarSending] = useState(false);
-  const [isCardSending, setIsCardSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [cardForDelete, setCardForDelete] = useState(null);
   const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = useState(false);
   function handleCardClick(card) {
@@ -27,7 +26,7 @@ function App() {
   }
 
   function handleCardLike(card) {
-    const isLiked = card.likes.some(i => i._id === currentUsers._id);
+    const isLiked = card.likes.some(i => i._id === currentUser._id);
     api.changeLike(card._id, !isLiked)
     .then((newCard) => {
         setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
@@ -36,14 +35,14 @@ function App() {
 } 
 
 function handleAddPlaceSubmit(card) {
-  setIsCardSending(true)
+  setIsLoading(true)
   api.addCard(card)
   .then((newCard) => {
     setCards([newCard, ...cards]);
     closeAllPopups(); 
   })
   .catch((error) => console.log(`Ошибка добавления карточки с сервера: ${error}`))
-  .finally(() =>  setIsCardSending(false));
+  .finally(() =>  setIsLoading(false));
 } 
 
 function handleCardDelete(evt) {
@@ -71,60 +70,63 @@ function handleCardDelete(evt) {
   useEffect(() => {
     api.getUserData()
       .then(res => {
-        setCurrentUsers(res);
+        setCurrentUser(res);
       })
       .catch((error) => console.log(`Ошибка загрузки данных пользователя с сервера: ${error}`));
   }, []);
 
   function closeAllPopups() {
-    setModalsState(initialModalState)
+    setIsEditProfilePopupOpen(false);
+    setIsAddPlacePopupOpen(false);
+    setIsEditAvatarPopupOpen(false);
+    setSelectedCard(null);
   }
 
 function handleUpdateUser(item){
-  setIsUserSending(true);
+  setIsLoading(true);
   api.setUserData(item)
     .then(res => {
-      setCurrentUsers(res);
+      setCurrentUser(res);
       closeAllPopups()
     })
     .catch((error) => console.log(`Ошибка загрузки данных пользователя с сервера: ${error}`))
-    .finally(() => setIsUserSending(false));
+    .finally(() => setIsLoading(false));
 }
 
 function handleUpdateAvatar(item){
-  setIsAvatarSending(true)
+  setIsLoading(true)
   api.setUserAvatar(item)
   .then(res => {
-    setCurrentUsers(res);
+    setCurrentUser(res);
     closeAllPopups()
   })
   .catch((error) => console.log(`Ошибка загрузки данных пользователя с сервера: ${error}`))
-  .finally(() => setIsAvatarSending(false));
+  .finally(() => setIsLoading(false));
 }
 
   return (
-     <currentUser.Provider value={currentUsers}>
+     <CurrentUserContext.Provider value={currentUser}>
   <div className="page">
     <Header />
-    <Main onEditProfile={() => setModalsState({isEditProfilePopupOpen: true})}
-    onAddPlace={() => setModalsState({isAddPlacePopupOpen: true})}
-    onEditAvatar={() => setModalsState({isEditAvatarPopupOpen: true})} 
+    <Main onEditProfile={setIsEditProfilePopupOpen}
+    onAddPlace={setIsAddPlacePopupOpen}
+    onEditAvatar={setIsEditAvatarPopupOpen} 
     onCardClick={handleCardClick} onCardLike={handleCardLike} cards={cards} onCardDelete={handleCardDeleteRequest}/>
     <Footer />
     
-    <EditAvatarPopup isOpen={modalsState.isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} isSending={isAvatarSending} /> 
+    <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} isSending={isLoading} /> 
 
     <PopupWithForm name="submit" title="Вы уверены?" text="Да" onSubmit={handleCardDelete} isOpen={isDeleteCardPopupOpen} >
     </PopupWithForm>
    
-    <EditProfilePopup isOpen={modalsState.isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} isSending={isUserSending}/> 
+    <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} isSending={isLoading}/> 
 
-    <AddPlacePopup isOpen={modalsState.isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} isSending={isCardSending}/>
+    <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} isSending={isLoading}/>
 
-    <ImagePopup card={selectedCard} onClose={() => setSelectedCard(null)} />
+    <ImagePopup card={selectedCard} onClose={closeAllPopups} />
     
   </div>
-</currentUser.Provider>
+</CurrentUserContext.Provider>
   );
 }
 
