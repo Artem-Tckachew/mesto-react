@@ -4,7 +4,7 @@ import React from 'react';
 
 const PopupWithForm = (props) => {
   return (
-    <section className={props.isOpen ? `overlay overlay_${props.name} overlay_active` : `overlay overlay_${props.name}`}  noValidate>
+    <section className={props.isOpen ? `overlay overlay_${props.name} overlay_active` : `overlay overlay_${props.name}`}>
       <form className="popup popup_form" name={props.name} onSubmit={props.onSubmit}>
         <fieldset className="form"> 
           <legend className="popup__title">{props.title}</legend>
