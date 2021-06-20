@@ -16,11 +16,12 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [currentUser, setCurrentUser] = useState('');
+  const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cardForDelete, setCardForDelete] = useState(null);
   const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = useState(false);
+  
   function handleCardClick(card) {
     setSelectedCard(card);
   }
